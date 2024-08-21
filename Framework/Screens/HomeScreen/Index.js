@@ -227,22 +227,33 @@ const Collections = () => {
 const CategoryCard = (item)=>{
   return(
 <View>
-
+{/* <Image source={} /> */}
+<Text></Text>
+<Text></Text>
 </View>
   )
 }
 
-const FeaturedCollection = () => {
+const FeaturedCollection = (products) => {
   return (
-    <View style={{ backgroundColor: "white", padding: 8, borderRadius: 20 }}>
-      <View style={{flexDirection:"row",}}>
+    <View style={{ backgroundColor: "white", padding: 8, borderRadius: 30 ,paddingVertical:20,minHeight:400}}>
+      <View style={{flexDirection:"row",justifyContent:"space-between",paddingRight:4,alignItems:"center"}}>
         <View>
-          <Text>Digital Electronics</Text>
-          <Text>Take a look from a variety of brands and companies</Text>
+          <Text style={{fontSize:17,fontWeight:500}}>Digital Electronics</Text>
+          <Text style={{fontSize:10}}>Take a look from a variety of brands and companies</Text>
         </View>
         <Pressable onPress={() => console.log("clicked seemore")}>
-          <Text>SEE MORE</Text>
+          <Text style={{fontSize:10,color:HomeTheme.colors.primary}}>SEE MORE</Text>
         </Pressable>
+      </View>
+      <View>
+      <FlatList
+            data={products}
+            renderItem={CategoryCard}
+            keyExtractor={(item) => item.id.toString()}
+            numColumns={2} 
+            contentContainerStyle={styles.container}
+        />
       </View>
     </View>
   );
@@ -264,28 +275,28 @@ const Index = () => {
   //     setLoading(false);
   //   }
   // };
+  const getData = async () => {
+    try {
+      setLoading(true)
+      const res = await fetch("https://fakestoreapi.com/products");
+      console.log("requesting");
+      const data = await res.json();
+      console.log("data", data);
+      // setProducts([...data]);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching products", error);
+      setLoading(false);
+    }
+  };
 
-  // useEffect(() => {
-  //   const getData = async () => {
-  //     try {
-  //       setLoading(true)
-  //       const res = await fetch("https://fakestoreapi.com/products");
-  //       console.log("requesting");
-  //       const data = await res.json();
-  //       console.log("data", data);
-  //       // setProducts([...data]);
-  //       setLoading(false);
-  //     } catch (error) {
-  //       console.error("Error fetching products", error);
-  //       setLoading(false);
-  //     }
-  //   };
-  //   getData();
-  // }, []);
+  useEffect(() => {
+    getData();
+  }, []);
 
-  // useEffect(() => {
-  //   console.log(products);
-  // }, [products]);
+  useEffect(() => {
+    console.log(products);
+  }, [products]);
 
   return (
     <SafeAreaView style={{ backgroundColor: HomeTheme.colors.background }}>
@@ -301,14 +312,15 @@ const Index = () => {
           style={{
             padding: HomeTheme.spacing.small,
             gap: 12,
-            marginBottom: 500,
+            // marginBottom: 500,
+            marginBottom:10
           }}
         >
           <Text style={{ fontSize: 16 }}>Discover</Text>
           <Categories />
         </View>
         <View>
-          <FeaturedCollection />
+          {loading ? <Text>loading...</Text> : <FeaturedCollection products={products}/>}
         </View>
       </ScrollView>
     </SafeAreaView>
