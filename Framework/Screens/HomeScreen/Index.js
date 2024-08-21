@@ -247,13 +247,13 @@ const FeaturedCollection = (products) => {
         </Pressable>
       </View>
       <View>
-      <FlatList
+      {/* <FlatList
             data={products}
             renderItem={CategoryCard}
             keyExtractor={(item) => item.id.toString()}
             numColumns={2} 
             contentContainerStyle={styles.container}
-        />
+        /> */}
       </View>
     </View>
   );
