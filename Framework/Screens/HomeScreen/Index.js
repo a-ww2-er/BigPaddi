@@ -7,14 +7,23 @@ import {
   Image,
   Pressable,
   StatusBar,
+  StyleSheet,
   ScrollView,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import Carousel from "react-native-reanimated-carousel";
 import axios from "axios";
-import { HomeTheme } from "./Theme";
+
 import Ionicons from "@expo/vector-icons/Ionicons";
 
+function format(price) {
+  const nigerianCurrencyFormat = new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+  });
+
+  return nigerianCurrencyFormat.format(price);
+}
 const { height, width } = Dimensions.get("window");
 const collections = [
   "All",
@@ -224,36 +233,83 @@ const Collections = () => {
   );
 };
 
-const CategoryCard = (item)=>{
-  return(
-<View>
-{/* <Image source={} /> */}
-<Text></Text>
-<Text></Text>
-</View>
-  )
-}
-
-const FeaturedCollection = (products) => {
+const CategoryCard = (item) => {
   return (
-    <View style={{ backgroundColor: "white", padding: 8, borderRadius: 30 ,paddingVertical:20,minHeight:400}}>
-      <View style={{flexDirection:"row",justifyContent:"space-between",paddingRight:4,alignItems:"center"}}>
+    <View>
+      {/* <Image source={} /> */}
+      <Text>{item.title}</Text>
+      <Text></Text>
+    </View>
+  );
+};
+
+const FeaturedCollection = (products, loading) => {
+  return (
+    <View
+      style={{
+        backgroundColor: "white",
+        padding: 8,
+        borderRadius: 30,
+        paddingVertical: 20,
+        minHeight: 400,
+      }}
+    >
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          paddingRight: 4,
+          alignItems: "center",
+        }}
+      >
         <View>
-          <Text style={{fontSize:17,fontWeight:500}}>Digital Electronics</Text>
-          <Text style={{fontSize:10}}>Take a look from a variety of brands and companies</Text>
+          <Text style={{ fontSize: 17, fontWeight: 500 }}>
+            Digital Electronics
+          </Text>
+          <Text style={{ fontSize: 10 }}>
+            Take a look from a variety of brands and companies
+          </Text>
         </View>
         <Pressable onPress={() => console.log("clicked seemore")}>
-          <Text style={{fontSize:10,color:HomeTheme.colors.primary}}>SEE MORE</Text>
+          <Text style={{ fontSize: 10, color: HomeTheme.colors.primary }}>
+            SEE MORE
+          </Text>
         </Pressable>
       </View>
       <View>
-      {/* <FlatList
+        {/* <FlatList
             data={products}
             renderItem={CategoryCard}
             keyExtractor={(item) => item.id.toString()}
             numColumns={2} 
-            contentContainerStyle={styles.container}
+            // contentContainerStyle={styles.container}\
+            
+
         /> */}
+        <View style={styles.container}>
+          {loading === true ? (
+            <Text> Loading...</Text>
+          ) : products && products.products.length > 0 ? (
+            products.products.map((item, index) => (
+              <View key={index}>
+                <Image
+                  source={{ uri: item.image }}
+                  style={{ width: 120, height: 120, borderRadius: 10 }}
+                />
+                <Text
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{ maxWidth: 150 }}
+                >
+                  {item.title}
+                </Text>
+                <Text>{format(item.price)}</Text>
+              </View>
+            ))
+          ) : (
+            <Text>Please Refresh</Text>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -262,27 +318,20 @@ const FeaturedCollection = (products) => {
 const Index = () => {
   const [images, setImages] = useState();
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  // const getData = async () => {
-  //   try {
-  //     const res = await axios.get("https://jsonserver.reactbd.com/amazonpro");
-  //     console.log("requesting");
-  //     setProducts(res.data);
-  //     setLoading(false);
-  //   } catch (error) {
-  //     console.error("Error fetching products", error);
-  //     setLoading(false);
-  //   }
-  // };
   const getData = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       const res = await fetch("https://fakestoreapi.com/products");
       console.log("requesting");
-      const data = await res.json();
-      console.log("data", data);
-      // setProducts([...data]);
+      if (res.ok) {
+        const data = await res.json();
+        console.log("data", data);
+        setProducts(data);
+      } else {
+        console.error("Error fetching products. Status:", res.status);
+      }
       setLoading(false);
     } catch (error) {
       console.error("Error fetching products", error);
@@ -312,15 +361,14 @@ const Index = () => {
           style={{
             padding: HomeTheme.spacing.small,
             gap: 12,
-            // marginBottom: 500,
-            marginBottom:10
+            marginBottom: 10,
           }}
         >
           <Text style={{ fontSize: 16 }}>Discover</Text>
           <Categories />
         </View>
-        <View>
-          {loading ? <Text>loading...</Text> : <FeaturedCollection products={products}/>}
+        <View style={{ marginBottom: 200 }}>
+          <FeaturedCollection products={products} loading={loading} />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -328,3 +376,52 @@ const Index = () => {
 };
 
 export default Index;
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    rowGap: 10,
+    justifyContent: "space-between",
+    padding: 16,
+  },
+  item: {
+    width: "48%",
+    marginVertical: 8,
+    padding: 16,
+    backgroundColor: "#f6f6f6",
+  },
+});
+
+const HomeTheme = {
+  colors: {
+    primary: "#473A5E",
+    secondary: "#2ecc71",
+    text: "#333",
+    background: "#f6f6f6",
+  },
+
+  font: {
+    fontSize: {
+      small: 14,
+      regular: 16,
+      large: 20,
+    },
+    brand: "Pacifico_400Regular",
+    text100: "Montserrat_100Thin",
+    text200: "Montserrat_200ExtraLight",
+    text300: "Montserrat_300Light",
+    text400: "Montserrat_400Regular",
+    text500: "Montserrat_500Medium",
+    text600: "Montserrat_600SemiBold",
+    text700: "Montserrat_700Bold",
+    text800: "Montserrat_800ExtraBold",
+    text900: "Montserrat_900Black",
+  },
+
+  spacing: {
+    small: 8,
+    regular: 16,
+    large: 24,
+  },
+};
