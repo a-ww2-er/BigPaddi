@@ -12,10 +12,11 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import Carousel from "react-native-reanimated-carousel";
-import axios from "axios";
-
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { Theme } from "../../Components/Theme";
+const { height, width } = Dimensions.get("window");
 
+//format price with commas and add NG currency
 function format(price) {
   const nigerianCurrencyFormat = new Intl.NumberFormat("en-NG", {
     style: "currency",
@@ -24,7 +25,6 @@ function format(price) {
 
   return nigerianCurrencyFormat.format(price);
 }
-const { height, width } = Dimensions.get("window");
 const collections = [
   "All",
   "New Arrivals",
@@ -40,15 +40,114 @@ const collections = [
   "Travel Essentials",
   "Kids Collection",
 ];
-const CarouselBody = () => {
-  const images = [
-    require("../../../assets/homepage/img1.jpg"),
-    require("../../../assets/homepage/img2.jpg"),
-    require("../../../assets/homepage/img3.jpg"),
-    require("../../../assets/homepage/img4.jpg"),
-    require("../../../assets/homepage/img5.jpg"),
-  ];
+const allCategories = [
+  {
+    image: require("../../../assets/categoryImages/cloths.png"),
+    name: "Cloths",
+  },
+  {
+    image: require("../../../assets/categoryImages/bags.png"),
+    name: "bags",
+  },
+  {
+    image: require("../../../assets/categoryImages/furniture.png"),
+    name: "furniture",
+  },
+  {
+    image: require("../../../assets/categoryImages/shoe.png"),
+    name: "shoe",
+  },
+  {
+    image: require("../../../assets/categoryImages/electronics.png"),
+    name: "electronics",
+  },
+  {
+    image: require("../../../assets/categoryImages/cloths.png"),
+    name: "Cloths",
+  },
+];
 
+const images = [
+  require("../../../assets/homepage/img1.jpg"),
+  require("../../../assets/homepage/img2.jpg"),
+  require("../../../assets/homepage/img3.jpg"),
+  require("../../../assets/homepage/img4.jpg"),
+  require("../../../assets/homepage/img5.jpg"),
+];
+
+const Home = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const getData = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("https://fakestoreapi.com/products");
+      if (res.ok) {
+        const data = await res.json();
+        setProducts(data);
+      } else {
+        console.error("Error fetching products. Status:", res.status);
+      }
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching products", error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+  return (
+    <SafeAreaView style={{ backgroundColor: "#F6F6F6" }}>
+      <View style={{ paddingBottom: 4 }}>
+        <Header />
+        <Collections />
+      </View>
+      <ScrollView>
+        <View id="manual slider" style={{ height: 241, position: "relative" }}>
+          <CarouselBody />
+        </View>
+        <View
+          style={{
+            padding: 8,
+            gap: 12,
+            marginBottom: 10,
+          }}
+        >
+          <Text style={{ fontSize: 16 }}>Discover</Text>
+          <Categories />
+        </View>
+        <View style={{ marginBottom: 200 }}>
+          <FeaturedCollection products={products} loading={loading} />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+export default Home;
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    rowGap: 10,
+    justifyContent: "space-between",
+    padding: 16,
+  },
+  item: {
+    width: "48%",
+    marginVertical: 8,
+    padding: 16,
+    backgroundColor: "#f6f6f6",
+  },
+});
+
+//carousel slider
+const CarouselBody = () => {
   return (
     <View>
       <Carousel
@@ -59,7 +158,6 @@ const CarouselBody = () => {
         data={images}
         scrollAnimationDuration={2800}
         renderItem={({ item }) => {
-          // console.log(item.uri);
           return (
             <View>
               <Image
@@ -73,6 +171,8 @@ const CarouselBody = () => {
     </View>
   );
 };
+
+//topbar (header)
 const Header = () => {
   return (
     <SafeAreaView
@@ -80,7 +180,7 @@ const Header = () => {
     >
       <View
         style={{
-          paddingHorizontal: HomeTheme.spacing.small,
+          paddingHorizontal: 8,
           flexDirection: "row",
           justifyContent: "space-between",
         }}
@@ -135,33 +235,7 @@ const Header = () => {
   );
 };
 
-const allCategories = [
-  {
-    image: require("../../../assets/categoryImages/cloths.png"),
-    name: "Cloths",
-  },
-  {
-    image: require("../../../assets/categoryImages/bags.png"),
-    name: "bags",
-  },
-  {
-    image: require("../../../assets/categoryImages/furniture.png"),
-    name: "furniture",
-  },
-  {
-    image: require("../../../assets/categoryImages/shoe.png"),
-    name: "shoe",
-  },
-  {
-    image: require("../../../assets/categoryImages/electronics.png"),
-    name: "electronics",
-  },
-  {
-    image: require("../../../assets/categoryImages/cloths.png"),
-    name: "Cloths",
-  },
-];
-
+//sliding categories that have circle images
 const Categories = () => {
   return (
     <View>
@@ -184,6 +258,7 @@ const Categories = () => {
   );
 };
 
+//top sliding component below navbar
 const Collections = () => {
   const [selected, setSelected] = useState(0);
   return (
@@ -198,7 +273,7 @@ const Collections = () => {
               style={
                 index == selected
                   ? {
-                      backgroundColor: HomeTheme.colors.primary,
+                      backgroundColor: Theme.colors.primary,
                       marginRight: 10,
                       borderRadius: 6,
                       padding: 7,
@@ -233,16 +308,7 @@ const Collections = () => {
   );
 };
 
-const CategoryCard = (item) => {
-  return (
-    <View>
-      {/* <Image source={} /> */}
-      <Text>{item.title}</Text>
-      <Text></Text>
-    </View>
-  );
-};
-
+//The first collection shown
 const FeaturedCollection = (products, loading) => {
   return (
     <View
@@ -264,30 +330,21 @@ const FeaturedCollection = (products, loading) => {
       >
         <View>
           <Text style={{ fontSize: 17, fontWeight: 500 }}>
-            Digital Electronics
+            Newly Arrived
           </Text>
           <Text style={{ fontSize: 10 }}>
             Take a look from a variety of brands and companies
           </Text>
         </View>
         <Pressable onPress={() => console.log("clicked seemore")}>
-          <Text style={{ fontSize: 10, color: HomeTheme.colors.primary }}>
+          <Text style={{ fontSize: 10, color: Theme.colors.primary }}>
             SEE MORE
           </Text>
         </Pressable>
       </View>
       <View>
-        {/* <FlatList
-            data={products}
-            renderItem={CategoryCard}
-            keyExtractor={(item) => item.id.toString()}
-            numColumns={2} 
-            // contentContainerStyle={styles.container}\
-            
-
-        /> */}
         <View style={styles.container}>
-          {loading === true ? (
+          {loading ? (
             <Text> Loading...</Text>
           ) : products && products.products.length > 0 ? (
             products.products.map((item, index) => (
@@ -313,115 +370,4 @@ const FeaturedCollection = (products, loading) => {
       </View>
     </View>
   );
-};
-
-const Index = () => {
-  const [images, setImages] = useState();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const getData = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch("https://fakestoreapi.com/products");
-      console.log("requesting");
-      if (res.ok) {
-        const data = await res.json();
-        console.log("data", data);
-        setProducts(data);
-      } else {
-        console.error("Error fetching products. Status:", res.status);
-      }
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching products", error);
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getData();
-  }, []);
-
-  useEffect(() => {
-    console.log(products);
-  }, [products]);
-
-  return (
-    <SafeAreaView style={{ backgroundColor: HomeTheme.colors.background }}>
-      <View style={{ paddingBottom: 4 }}>
-        <Header />
-        <Collections />
-      </View>
-      <ScrollView>
-        <View id="manual slider" style={{ height: 241, position: "relative" }}>
-          <CarouselBody />
-        </View>
-        <View
-          style={{
-            padding: HomeTheme.spacing.small,
-            gap: 12,
-            marginBottom: 10,
-          }}
-        >
-          <Text style={{ fontSize: 16 }}>Discover</Text>
-          <Categories />
-        </View>
-        <View style={{ marginBottom: 200 }}>
-          <FeaturedCollection products={products} loading={loading} />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
-
-export default Index;
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    rowGap: 10,
-    justifyContent: "space-between",
-    padding: 16,
-  },
-  item: {
-    width: "48%",
-    marginVertical: 8,
-    padding: 16,
-    backgroundColor: "#f6f6f6",
-  },
-});
-
-const HomeTheme = {
-  colors: {
-    primary: "#473A5E",
-    secondary: "#2ecc71",
-    text: "#333",
-    background: "#f6f6f6",
-  },
-
-  font: {
-    fontSize: {
-      small: 14,
-      regular: 16,
-      large: 20,
-    },
-    brand: "Pacifico_400Regular",
-    text100: "Montserrat_100Thin",
-    text200: "Montserrat_200ExtraLight",
-    text300: "Montserrat_300Light",
-    text400: "Montserrat_400Regular",
-    text500: "Montserrat_500Medium",
-    text600: "Montserrat_600SemiBold",
-    text700: "Montserrat_700Bold",
-    text800: "Montserrat_800ExtraBold",
-    text900: "Montserrat_900Black",
-  },
-
-  spacing: {
-    small: 8,
-    regular: 16,
-    large: 24,
-  },
 };
