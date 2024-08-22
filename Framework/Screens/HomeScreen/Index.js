@@ -309,7 +309,7 @@ const Collections = () => {
 };
 
 //The first collection shown
-const FeaturedCollection = (products, loading) => {
+const FeaturedCollection = ({products, loading}) => {
   return (
     <View
       style={{
@@ -346,8 +346,8 @@ const FeaturedCollection = (products, loading) => {
         <View style={styles.container}>
           {loading ? (
             <Text> Loading...</Text>
-          ) : products && products.products.length > 0 ? (
-            products.products.map((item, index) => (
+          ) : products && products?.length > 0 ? (
+            products.map((item, index) => (
               <View key={index}>
                 <Image
                   source={{ uri: item.image }}
