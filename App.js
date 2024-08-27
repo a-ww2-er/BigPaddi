@@ -9,7 +9,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 // import { StackNavigator } from "./Framework/Navigators/StackNavigator";
 // import { Preloader } from "./Framework/Components/Preloader";
-// import { AppProvider } from "./global/globalVariables";
+import { AppProvider } from "./Framework/Components/GlobalVariables";
 import { RootSiblingParent } from "react-native-root-siblings";
 import { Login } from "./Framework/Screens/Login";
 import { StackNavigator } from "./Framework/Navigation/StackNavigator";
@@ -55,7 +55,9 @@ export default function App() {
   return (
     <RootSiblingParent>
       <NavigationContainer>
+        <AppProvider>
         <StackNavigator />
+        </AppProvider>
       </NavigationContainer>
     </RootSiblingParent>
   );
